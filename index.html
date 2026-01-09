@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APULA - Smart Fire Detection System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-red: #FF4444;
+            --primary-orange: #FF6B35;
+            --secondary-orange: #FF8B5A;
+            --light-orange: #FFB08F;
+            --dark-red: #CC0000;
+            --background: #0F0F0F;
+            --card-bg: #1A1A1A;
+            --text-light: #FFFFFF;
+            --text-dim: #B0B0B0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0F0F0F 0%, #2A1A1A 100%);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header Styles */
+        .header {
+            text-align: center;
+            padding: 30px 20px;
+            background: linear-gradient(90deg, var(--dark-red) 0%, var(--primary-orange) 100%);
+            border-radius: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(255, 107, 53, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            animation: float 20s linear infinite;
+        }
+
+        @keyframes float {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .logo {
+            font-size: 4.5rem;
+            font-weight: 900;
+            color: white;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .tagline {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        /* Card Styles */
+        .card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(255, 107, 53, 0.1);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(255, 107, 53, 0.2);
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--primary-orange);
+        }
+
+        .card-title i {
+            font-size: 1.6rem;
+        }
+
+        /* Status Cards */
+        .status-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .status-card {
+            background: linear-gradient(135deg, #2A1A1A 0%, #1A1A1A 100%);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .status-card.alert {
+            border-color: var(--primary-red);
+            background: linear-gradient(135deg, #3A1A1A 0%, #2A0A0A 100%);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0); }
+        }
+
+        .status-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .status-text {
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .status-subtext {
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        /* Camera Feed */
+        .camera-feed-container {
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
+            background: #000;
+            margin-bottom: 20px;
+        }
+
+        #cameraFeed {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            display: none;
+        }
+
+        .camera-placeholder {
+            width: 100%;
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(45deg, #1A1A1A 25%, #2A2A2A 25%, #2A2A2A 50%, #1A1A1A 50%, #1A1A1A 75%, #2A2A2A 75%);
+            background-size: 20px 20px;
+            animation: move 4s linear infinite;
+        }
+
+        @keyframes move {
+            0% { background-position: 0 0; }
+            100% { background-position: 40px 40px; }
+        }
+
+        /* Controls */
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .control-btn {
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary-orange) 0%, var(--secondary-orange) 100%);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .control-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.4);
+        }
+
+        .control-btn.danger {
+            background: linear-gradient(135deg, var(--primary-red) 0%, #FF6B6B 100%);
+        }
+
+        .control-btn.success {
+            background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+        }
+
+        .control-btn i {
+            font-size: 1.2rem;
+        }
+
+        /* Water Control */
+        .water-control {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .pressure-slider {
+            flex: 1;
+        }
+
+        .pressure-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-orange);
+            min-width: 60px;
+            text-align: center;
+        }
+
+        /* Connection Panel */
+        .connection-panel {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .connection-btn {
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid var(--primary-orange);
+            background: transparent;
+            color: var(--text-light);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .connection-btn:hover {
+            background: var(--primary-orange);
+            transform: translateY(-2px);
+        }
+
+        /* Logs */
+        .log-container {
+            height: 200px;
+            overflow-y: auto;
+            background: #111;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+        }
+
+        .log-entry {
+            padding: 5px 0;
+            border-bottom: 1px solid #333;
+        }
+
+        .log-entry.alert {
+            color: var(--primary-red);
+        }
+
+        .log-entry.info {
+            color: #4CAF50;
+        }
+
+        .log-entry.warning {
+            color: #FFC107;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .logo {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1 class="logo">APULA</h1>
+            <p class="tagline">Automated Prevention Unit for Lethal Ablaze</p>
+        </div>
+
+        <!-- Main Dashboard -->
+        <div class="dashboard-grid">
+            <!-- Left Column -->
+            <div class="column">
+                <!-- System Status -->
+                <div class="card">
+                    <h2 class="card-title">
+                        <i class="fas fa-shield-alt"></i>
+                        System Status
+                    </h2>
+                    <div class="status-cards">
+                        <div class="status-card" id="fireStatus">
+                            <div class="status-icon">
+                                <i class="fas fa-fire"></i>
+                            </div>
+                            <div class="status-text">NO FIRE DETECTED</div>
+                            <div class="status-subtext">System Normal</div>
+                        </div>
+                        <div class="status-card" id="waterStatus">
+                            <div class="status-icon">
+                                <i class="fas fa-tint"></i>
+                            </div>
+                            <div class="status-text">WATER READY</div>
+                            <div class="status-subtext">Pressure: 0%</div>
+                        </div>
+                        <div class="status-card" id="cameraStatus">
+                            <div class="status-icon">
+                                <i class="fas fa-video"></i>
+                            </div>
+                            <div class="status-text">CAMERA OFFLINE</div>
+                            <div class="status-subtext">Not Connected</div>
+                        </div>
+                        <div class="status-card" id="recordingStatus">
+                            <div class="status-icon">
+                                <i class="fas fa-record-vinyl"></i>
+                            </div>
+                            <div class="status-text">NOT RECORDING</div>
+                            <div class="status-subtext">Idle</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Camera Connection -->
+                <div class="card">
+                    <h2 class="card-title">
+                        <i class="fas fa-wifi"></i>
+                        Camera Connection
+                    </h2>
+                    <div class="connection-panel">
+                        <button class="connection-btn" onclick="connectCamera('wifi')">
+                            <i class="fas fa-wifi"></i>
+                            WiFi Camera
+                        </button>
+                        <button class="connection-btn" onclick="connectCamera('bluetooth')">
+                            <i class="fas fa-bluetooth"></i>
+                            Bluetooth
+                        </button>
+                        <button class="connection-btn" onclick="connectCamera('rtsp')">
+                            <i class="fas fa-satellite-dish"></i>
+                            RTSP Stream
+                        </button>
+                        <button class="connection-btn" onclick="connectCamera('webcam')">
+                            <i class="fas fa-webcam"></i>
+                            Webcam
+                        </button>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <input type="text" id="streamUrl" placeholder="Enter RTSP URL (e.g., rtsp://username:password@ip:port)" 
+                               style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #222; color: white;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center Column -->
+            <div class="column">
+                <!-- Camera Feed -->
+                <div class="card">
+                    <h2 class="card-title">
+                        <i class="fas fa-eye"></i>
+                        Live Camera Feed
+                    </h2>
+                    <div class="camera-feed-container">
+                        <video id="cameraFeed" autoplay playsinline></video>
+                        <div class="camera-placeholder" id="cameraPlaceholder">
+                            <i class="fas fa-video-slash" style="font-size: 3rem; opacity: 0.3; margin-bottom: 15px;"></i>
+                            <p style="opacity: 0.5;">Camera feed will appear here</p>
+                        </div>
+                    </div>
+                    
+                    <div class="controls">
+                        <button class="control-btn success" onclick="startRecording()" id="recordBtn">
+                            <i class="fas fa-record-vinyl"></i>
+                            Start Recording
+                        </button>
+                        <button class="control-btn danger" onclick="stopRecording()" id="stopBtn" disabled>
+                            <i class="fas fa-stop"></i>
+                            Stop Recording
+                        </button>
+                        <button class="control-btn" onclick="captureSnapshot()">
+                            <i class="fas fa-camera"></i>
+                            Take Snapshot
+                        </button>
+                        <button class="control-btn" onclick="toggleFullscreen()">
+                            <i class="fas fa-expand"></i>
+                            Fullscreen
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Water Control -->
+                <div class="card">
+                    <h2 class="card-title">
+                        <i class="fas fa-tint"></i>
+                        Water Control System
+                    </h2>
+                    <div class="water-control">
+                        <div style="flex: 1;">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Pressure Control</label>
+                            <input type="range" min="0" max="100" value="80" class="pressure-slider" id="pressureSlider" 
+                                   oninput="updatePressure(this.value)">
+                        </div>
+                        <div class="pressure-value" id="pressureValue">80%</div>
+                    </div>
+                    
+                    <div class="controls" style="margin-top: 20px;">
+                        <button class="control-btn success" onclick="activateWater()" id="activateWaterBtn">
+                            <i class="fas fa-play"></i>
+                            Activate Water
+                        </button>
+                        <button class="control-btn danger" onclick="deactivateWater()" id="deactivateWaterBtn" disabled>
+                            <i class="fas fa-stop"></i>
+                            Stop Water
+                        </button>
+                        <button class="control-btn" onclick="testSprinkler()">
+                            <i class="fas fa-spray-can"></i>
+                            Test Sprinkler
+                        </button>
+                        <button class="control-btn" onclick="emergencyStop()">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Emergency Stop
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="column">
+                <!-- Fire Detection Logs -->
+                <div class="card">
+                    <h2 class="card-title">
+                        <i class="fas fa-clipboard-list"></i>
+                        System Logs
+                    </h2>
+                    <div class="log-container" id="logContainer">
+                        <div class="log-entry info">System initialized</div>
+                        <div class="log-entry info">Fire detection model loaded</div>
+                        <div class="log-entry info">Water system ready</div>
+                        <div class="log-entry">Waiting for camera connection...</div>
+                    </div>
+                </div>
+
+                <!-- Settings -->
+                <div class="card">
+                    <h2 class="card-title">
+                        <i class="fas fa-cog"></i>
+                        Settings
+                    </h2>
+                    <div style="margin-top: 15px;">
+                        <label style="display: block; margin-bottom: 10px; font-weight: 500;">
+                            Fire Detection Sensitivity
+                        </label>
+                        <input type="range" min="1" max="100" value="70" style="width: 100%;" 
+                               oninput="updateSensitivity(this.value)">
+                        <div style="text-align: center; margin-top: 5px; font-size: 0.9rem;">
+                            Current: <span id="sensitivityValue">70%</span>
+                        </div>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <label style="display: block; margin-bottom: 10px; font-weight: 500;">
+                            Auto Water Activation
+                        </label>
+                        <label class="switch">
+                            <input type="checkbox" id="autoWaterToggle" checked>
+                            <span class="slider"></span>
+                            <span style="margin-left: 10px;">Enabled</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="card">
+                    <h2 class="card-title">
+                        <i class="fas fa-chart-bar"></i>
+                        Quick Stats
+                    </h2>
+                    <div style="margin-top: 15px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span>Cameras Connected:</span>
+                            <span id="statCameras">0</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span>Fire Detections:</span>
+                            <span id="statFires">0</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span>Water Activations:</span>
+                            <span id="statWater">0</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span>Storage Used:</span>
+                            <span id="statStorage">0 GB</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>Uptime:</span>
+                            <span id="statUptime">00:00:00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fire Alert Modal -->
+    <div id="fireAlertModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: linear-gradient(135deg, #3A0A0A 0%, #5A0A0A 100%); padding: 40px; border-radius: 25px; text-align: center; max-width: 500px; width: 90%;">
+            <i class="fas fa-fire" style="font-size: 4rem; color: #FF4444; margin-bottom: 20px;"></i>
+            <h2 style="color: white; font-size: 2.5rem; margin-bottom: 10px;">FIRE DETECTED!</h2>
+            <p style="color: #FFB08F; margin-bottom: 30px; font-size: 1.1rem;">Fire has been detected in the monitored area. Water system is activating automatically.</p>
+            <button onclick="closeFireAlert()" style="background: var(--primary-red); color: white; border: none; padding: 15px 40px; border-radius: 12px; font-weight: 600; font-size: 1.1rem; cursor: pointer;">
+                ACKNOWLEDGE ALERT
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // WebSocket connection
+        let socket = null;
+        let currentStream = null;
+        let isRecording = false;
+        let stats = {
+            cameras: 0,
+            fires: 0,
+            waterActivations: 0,
+            startTime: new Date()
+        };
+
+        // Initialize WebSocket connection
+        function initWebSocket() {
+            socket = new WebSocket('ws://localhost:3000');
+            
+            socket.onopen = () => {
+                addLog('Connected to APULA server', 'info');
+                updateStatus('connected');
+            };
+            
+            socket.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                handleServerMessage(data);
+            };
+            
+            socket.onclose = () => {
+                addLog('Disconnected from server', 'warning');
+                updateStatus('disconnected');
+                setTimeout(initWebSocket, 3000); // Reconnect after 3 seconds
+            };
+        }
+
+        // Handle server messages
+        function handleServerMessage(data) {
+            switch(data.type) {
+                case 'fire-detected':
+                    handleFireDetection(data.payload);
+                    break;
+                case 'camera-connected':
+                    handleCameraConnected(data.payload);
+                    break;
+                case 'water-activated':
+                    handleWaterActivated(data.payload);
+                    break;
+                case 'status-update':
+                    updateStatusDisplay(data.payload);
+                    break;
+            }
+        }
+
+        // Camera connection
+        function connectCamera(type) {
+            let streamUrl = document.getElementById('streamUrl').value;
+            
+            if (type === 'webcam') {
+                connectWebcam();
+                return;
+            }
+            
+            if ((type === 'rtsp' || type === 'wifi') && !streamUrl) {
+                alert('Please enter a stream URL');
+                return;
+            }
+            
+            addLog(`Connecting ${type} camera...`, 'info');
+            
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({
+                    type: 'connect-camera',
+                    cameraType: type,
+                    streamUrl: streamUrl
+                }));
+            }
+        }
+
+        // Connect to webcam
+        async function connectWebcam() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: 1280, height: 720 },
+                    audio: false
+                });
+                
+                const video = document.getElementById('cameraFeed');
+                video.srcObject = stream;
+                video.style.display = 'block';
+                document.getElementById('cameraPlaceholder').style.display = 'none';
+                currentStream = stream;
+                
+                addLog('Webcam connected successfully', 'info');
+                updateCameraStatus('connected');
+            } catch (error) {
+                addLog('Failed to connect webcam: ' + error.message, 'alert');
+            }
+        }
+
+        // Recording controls
+        function startRecording() {
+            isRecording = true;
+            document.getElementById('recordBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = false;
+            addLog('Recording started', 'info');
+            updateRecordingStatus('recording');
+        }
+
+        function stopRecording() {
+            isRecording = false;
+            document.getElementById('recordBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+            addLog('Recording stopped', 'info');
+            updateRecordingStatus('stopped');
+        }
+
+        // Water control
+        function updatePressure(value) {
+            document.getElementById('pressureValue').textContent = value + '%';
+            document.getElementById('waterStatus').querySelector('.status-subtext').textContent = `Pressure: ${value}%`;
+        }
+
+        function activateWater() {
+            const pressure = document.getElementById('pressureSlider').value;
+            
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({
+                    type: 'activate-water',
+                    pressure: pressure,
+                    duration: 30
+                }));
+            }
+            
+            document.getElementById('activateWaterBtn').disabled = true;
+            document.getElementById('deactivateWaterBtn').disabled = false;
+            addLog(`Water system activated at ${pressure}% pressure`, 'info');
+            updateWaterStatus('active');
+            stats.waterActivations++;
+            updateStats();
+        }
+
+        function deactivateWater() {
+            if (socket) {
+                socket.send(JSON.stringify({ type: 'deactivate-water' }));
+            }
+            
+            document.getElementById('activateWaterBtn').disabled = false;
+            document.getElementById('deactivateWaterBtn').disabled = true;
+            addLog('Water system deactivated', 'info');
+            updateWaterStatus('ready');
+        }
+
+        // Fire detection handler
+        function handleFireDetection(data) {
+            document.getElementById('fireStatus').classList.add('alert');
+            document.getElementById('fireStatus').querySelector('.status-text').textContent = 'FIRE DETECTED!';
+            document.getElementById('fireStatus').querySelector('.status-subtext').textContent = 'Activating water...';
+            
+            document.getElementById('fireAlertModal').style.display = 'flex';
+            addLog(`FIRE DETECTED in camera ${data.cameraId}`, 'alert');
+            
+            stats.fires++;
+            updateStats();
+            
+            // Auto-activate water if enabled
+            if (document.getElementById('autoWaterToggle').checked) {
+                setTimeout(() => activateWater(), 1000);
+            }
+        }
+
+        function closeFireAlert() {
+            document.getElementById('fireAlertModal').style.display = 'none';
+            document.getElementById('fireStatus').classList.remove('alert');
+            document.getElementById('fireStatus').querySelector('.status-text').textContent = 'NO FIRE DETECTED';
+            document.getElementById('fireStatus').querySelector('.status-subtext').textContent = 'System Normal';
+        }
+
+        // Utility functions
+        function addLog(message, type = '') {
+            const logContainer = document.getElementById('logContainer');
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function updateStatus(status) {
+            // Update connection status
+        }
+
+        function updateStats() {
+            document.getElementById('statCameras').textContent = stats.cameras;
+            document.getElementById('statFires').textContent = stats.fires;
+            document.getElementById('statWater').textContent = stats.waterActivations;
+            
+            // Update uptime
+            const uptime = Math.floor((new Date() - stats.startTime) / 1000);
+            const hours = Math.floor(uptime / 3600);
+            const minutes = Math.floor((uptime % 3600) / 60);
+            const seconds = uptime % 60;
+            document.getElementById('statUptime').textContent = 
+                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function updateSensitivity(value) {
+            document.getElementById('sensitivityValue').textContent = value + '%';
+            if (socket) {
+                socket.send(JSON.stringify({
+                    type: 'set-sensitivity',
+                    value: value
+                }));
+            }
+        }
+
+        // Initialize
+        window.onload = function() {
+            initWebSocket();
+            updateStats();
+            setInterval(updateStats, 1000);
+        };
+    </script>
+</body>
+</html>
